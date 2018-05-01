@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.5//EN"
+    "http://struts.apache.org/dtds/struts-2.5.dtd">
+
+<struts>
+
+	<constant name="struts.enable.DynamicMethodInvocation"
+		value="true"></constant>
+	<!-- 设置浏览器是否缓存静态内容，开发阶段应关闭，生产阶段打开，默认为打开 -->
+	<constant name="struts.serve.static.browserCache"
+		value="false"></constant>
+	<!-- 开发模式下使用，可以打印出更详细的错误信息 -->
+	<constant name="struts.devMode" value="true"></constant>
+
+	<package name="default" namespace="/" extends="struts-default">
+
+		<!-- 声明拦截器 -->
+		<interceptors>
+			<!-- 自定义的拦截器 -->
+			<interceptor name="interceptorLogin"
+				class="tk.wangyiwen.interceptor.LoinInterceptor">
+				<!-- 配置不拦截的方法 -->
+				<param name="excludeMethods">login,register</param>
+			</interceptor>
+
+			<!-- 将自定义的拦截器打包到一个拦截器栈 -->
+			<interceptor-stack name="customStack">
+				<interceptor-ref name="defaultStack"></interceptor-ref>
+				<interceptor-ref name="fileUpload">
+					<param name="allowedTypes">
+						image/bmp,image/png,image/gif,image/jpeg,image/jpg
+					</param>
+					<!-- 限制图片的格式和图片的大小 -->
+					<param name="maximumSize">1024102400</param>
+				</interceptor-ref>
+				<interceptor-ref name="interceptorLogin"></interceptor-ref>
+			</interceptor-stack>
+		</interceptors>
+
+		<!-- 将自定义的拦截器栈应用到全局 -->
+		<default-interceptor-ref name="customStack"></default-interceptor-ref>
+
+		<global-results>
+			<result name="error">/WEB-INF/jsp/error.jsp</result>
+			<result name="login">/WEB-INF/jsp/login.jsp</result>
+		</global-results>
+
+		<action name="login" class="loginAction" method="login">
+			<!-- 定义三个逻辑视图和资源之间的映射 -->
+			<result name="success">/WEB-INF/jsp/home.jsp</result>
+		</action>
+
+		<action name="register" class="registerAction"
+			method="register">
+			<!-- 定义三个逻辑视图和资源之间的映射 -->
+			<result name="success" type="chain">login</result>
+			<result name="error">/WEB-INF/jsp/register.jsp</result>
+		</action>
+
+		<action name="index" class="indexAction"></action>
+		<action name="jumpPage_*" class="jumpPageAction" method="{1}">
+			<result name="album">/WEB-INF/jsp/album2.jsp</result>
+			<!-- 允许动态方法调用的方法 -->
+			<allowed-methods>album</allowed-methods>
+		</action>
+		<action name="album_*" class="albumAction" method="{1}">
+			<result name="success" type="chain">album_show</result>
+			<result name="show">/WEB-INF/jsp/album2.jsp</result>
+			<!-- 允许动态方法调用的方法 -->
+			<allowed-methods>show,add</allowed-methods>
+		</action>
+		<action name="photo_*" class="photoAction" method="{1}">
+			<result name="success" type="chain">photo_show</result>
+			<result name="show">/WEB-INF/jsp/photo.jsp</result>
+			<!-- 允许动态方法调用的方法 -->
+			<allowed-methods>show,add</allowed-methods>
+		</action>
+		
+	</package>
+</struts>
